@@ -1,35 +1,41 @@
 <template>
   <div class="home">
     <div class="form">
-      <div class="imgBox">
-        <img
-          :src="img"
-          alt=""
-          class="img"
-          v-if="img && !img1"
-          ref="content"
-        />
-        <!-- <h3>生成图</h3> -->
-        <!-- <img  class="demoImg" :src="imgSrc" alt=""> -->
-        <!-- <div class="btn" @click="handleClick">click me</div> -->
+      <div class="box-all-wapper">
+        <div
+          class="imgBox"
+          ref="imgBoxRef"
+        >
+          <!--video用于显示媒体设备的视频流，自动播放-->
+          <video
+            v-show="!this.img"
+            id="video"
+            ref="videoRef"
+            :style="{ width: targetBoxSize.wid, height:targetBoxSize.hei}"
+            autoplay
+          />
+          <!--描绘video截图-->
+          <img
+            v-show="this.img"
+            class="showImg"
+            :src="img"
+            :style="{ width: targetBoxSize.wid, height:targetBoxSize.hei}"
+          />
+
+        </div>
       </div>
-      <label
-        for="file"
-        class="inputlabelBox"
-      >
-        <div class="inputBox"></div>
-      </label>
-      <input
-        type="file"
-        name="file"
-        id="file"
-        @change="updateFace"
-        accept="image/*"
-        capture="camera"
-        style="display: none"
-      />
-      <!-- <div class="changeImg" @click="changeImg"></div>
-      <img :src="img1" alt="" class="img" v-if="img1" /> -->
+      <!--  -->
+      <div class="btn_wapper">
+        <div
+          class="inputBox"
+          @click="takePic"
+        ></div>
+        <span
+          class="reTalePic"
+          @click="clearImg"
+        ></span>
+      </div>
+      <!--  -->
       <div class="form-item">
         <div class="name">
           <label
@@ -71,6 +77,10 @@ export default {
   name: "Home",
   data() {
     return {
+      targetBoxSize: {
+        wid: '',
+        hei: ''
+      },
       imgBase64: "",
       img: "",
       file: "",
@@ -80,14 +90,40 @@ export default {
     };
   },
   mounted() {
-    // this.getCompetence();
+    this.getDomWid()
+    this.getCompetence();
   },
-  created() {
-    let { query: { imgUrl } } = this.$route
-    // console.log('ffff', imgUrl)
-    this.img = imgUrl
-  },
+
   methods: {
+    clearImg() {
+      this.img = ''
+    },
+    takePic() {//视频截取拍照
+      let { videoRef, contextRef } = this.$refs
+      let { targetBoxSize: { wid, hei } } = this
+      // 
+      var canvas = document.createElement("canvas");
+      canvas.width = wid;
+      canvas.height = hei;
+      var ctx = canvas.getContext("2d");
+      // 
+      // let context = contextRef.getContext("2d");
+      // console.log(wid, hei)
+      // 画布转base64
+      ctx.drawImage(videoRef, 0, 0, wid, hei);
+      var dataURL = canvas.toDataURL("image/jpeg");
+      this.img = dataURL || ''
+
+    },
+    getDomWid() {
+      let { imgBoxRef: { offsetWidth, offsetHeight } } = this.$refs
+      console.log('offsetWidth', offsetWidth, 'offsetHeight', offsetHeight)
+      this.targetBoxSize = {
+        wid: offsetWidth * 0.9,
+        hei: offsetHeight * 0.9,
+      }
+      console.log(this.targetBoxSize)
+    },
     handleClick() {
       const self = this;
       console.log(this.$refs.content);
@@ -97,8 +133,6 @@ export default {
         self.imgBase64 = canvas.toDataURL();
         console.log(self.imgBase64);
       });
-
-
     },
     inputNameBtn() {
       this.flag = false;
@@ -200,61 +234,67 @@ export default {
     // 调用权限（打开摄像头功能）
     getCompetence() {
       var _this = this;
-      this.thisCancas = document.getElementById("canvasCamera");
-      this.thisContext = this.thisCancas.getContext("2d");
-      this.thisVideo = document.getElementById("videoCamera");
-      // 旧版本浏览器可能根本不支持mediaDevices，我们首先设置一个空对象
-      if (navigator.mediaDevices === undefined) {
-        navigator.mediaDevices = {};
+      var video = document.getElementById("video");
+      let navigator = window.navigator
+      console.log(navigator)
+      //访问用户媒体设备的兼容方法
+      function getUserMedia(constrains, success, error) {
+        if (navigator.mediaDevices.getUserMedia) {
+          //最新标准API
+          navigator.mediaDevices
+            .getUserMedia(constrains)
+            .then(success)
+            .catch(error);
+        } else if (navigator.webkitGetUserMedia) {
+          //webkit内核浏览器
+          navigator.webkitGetUserMedia(constrains).then(success).catch(error);
+        } else if (navigator.mozGetUserMedia) {
+          //Firefox浏览器
+          navagator.mozGetUserMedia(constrains).then(success).catch(error);
+        } else if (navigator.getUserMedia) {
+          //旧版API
+          navigator.getUserMedia(constrains).then(success).catch(error);
+        }
       }
-      // 一些浏览器实现了部分mediaDevices，我们不能只分配一个对象
-      // 使用getUserMedia，因为它会覆盖现有的属性。
-      // 这里，如果缺少getUserMedia属性，就添加它。
-      if (navigator.mediaDevices.getUserMedia === undefined) {
-        navigator.mediaDevices.getUserMedia = function(constraints) {
-          // 首先获取现存的getUserMedia(如果存在)
-          var getUserMedia =
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.getUserMedia;
-          // 有些浏览器不支持，会返回错误信息
-          // 保持接口一致
-          if (!getUserMedia) {
-            return Promise.reject(
-              new Error("getUserMedia is not implemented in this browser")
-            );
-          }
-          // 否则，使用Promise将调用包装到旧的navigator.getUserMedia
-          return new Promise(function(resolve, reject) {
-            getUserMedia.call(navigator, constraints, resolve, reject);
-          });
-        };
+
+
+      //成功的回调函数
+      function success(stream) {
+        //兼容webkit内核浏览器
+        var CompatibleURL = window.URL || window.webkitURL;
+        //将视频流设置为video元素的源
+        try {
+          video.srcObject = stream;
+        } catch (error) {
+          video.src = window.URL.createObjectURL(stream);
+        }
+        // video.src = CompatibleURL.createObjectURL(stream); // 此处的代码将会报错  解决的办法是将video的srcObject属性指向stream即可
+        //播放视频
+        video.play();
       }
-      var constraints = {
-        audio: false,
-        video: {
-          width: this.videoWidth,
-          height: this.videoHeight,
-          transform: "scaleX(-1)",
-        },
-      };
-      navigator.mediaDevices
-        .getUserMedia(constraints)
-        .then(function(stream) {
-          // 旧的浏览器可能没有srcObject
-          if ("srcObject" in _this.thisVideo) {
-            _this.thisVideo.srcObject = stream;
-          } else {
-            // 避免在新的浏览器中使用它，因为它正在被弃用。
-            _this.thisVideo.src = window.URL.createObjectURL(stream);
-          }
-          _this.thisVideo.onloadedmetadata = function(e) {
-            _this.thisVideo.play();
-          };
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+
+      //异常的回调函数
+      function error(error) {
+        console.log("访问用户媒体设备失败：", error.name, error.message);
+      }
+      if (
+        navigator.mediaDevices.getUserMedia ||
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia
+      ) {
+        //调用用户媒体设备，访问摄像头
+        let { wid, hei } = _this.targetBoxSize
+        getUserMedia(
+          {
+            video: { width: wid, height: hei },
+          },
+          success,
+          error
+        );
+      } else {
+        alert("你的浏览器不支持访问用户媒体设备");
+      }
     },
 
     returnToPageOne() {
@@ -368,6 +408,38 @@ export default {
   display: block;
   width: 90%;
   height: 90%;
+}
+.box-all-wapper {
+  position: relative;
+}
+.showImg {
+  /* width: 100%;
+  height: 100%; */
+}
+/* .get-video-wapper {
+  width: 150px;
+  height: 185px;
+} */
+.temp-canvas {
+  border: 1px solid red;
+}
+.reTalePic {
+  position: absolute;
+  right: 13%;
+  top: 50%;
+  transform: translate(-50%);
+  display: inline-block;
+  background-image: url(../assets/reTakeP.png);
+  background-position: center;
+  background-size: cover;
+  width: 20px;
+  height: 20px;
+}
+.btn_wapper {
+  position: relative;
+  /* display: flex;
+  justify-content: center;
+  align-items: center; */
 }
 </style>
 
