@@ -1,28 +1,27 @@
 <template>
-  <div>
-    <div class="wrapper">
-      <vueCropper
-        ref="cropper"
-        :img="option.img"
-        :outputSize="option.size"
-        :outputType="option.outputType"
-        :info="false"
-        :full="option.full"
-        :canMove="option.canMove"
-        :canMoveBox="option.canMoveBox"
-        :fixedBox="option.fixedBox"
-        :original="option.original"
-        :autoCrop="option.autoCrop"
-        :fixed="option.fixed"
-        :fixedNumber="option.fixedNumber"
-      ></vueCropper>
-      <div class="btn">
+  <div class="wrapper">
+    <vueCropper
+      ref="cropper"
+      :img="option.img"
+      :outputSize="option.size"
+      :outputType="option.outputType"
+      :info="false"
+      :full="option.full"
+      :canMove="option.canMove"
+      :canMoveBox="option.canMoveBox"
+      :fixedBox="option.fixedBox"
+      :original="option.original"
+      :autoCrop="option.autoCrop"
+      :fixed="option.fixed"
+      :fixedNumber="option.fixedNumber"
+    ></vueCropper>
+    <!-- <div class="btn">
         <a @click="backHome">取消</a>
         <a @click="finish('base64')">确定</a>
-      </div>
-    </div>
-    <!-- 生成预览图片-->
-    <!-- <div
+      </div> -->
+  </div>
+  <!-- 生成预览图片-->
+  <!-- <div
       class="show-preview"
       :style="{'width': previews.w + 'px', 'height': previews.h + 'px',  'overflow': 'hidden', 'margin': '5px'}"
     >
@@ -33,17 +32,23 @@
         >
       </div>
     </div> -->
-  </div>
 </template>
 <script>
 import { VueCropper } from 'vue-cropper'
 export default {
+  props: {
+    imgUrl: {
+      type: String,
+      default: ''
+    }
+  },
   components: {
     VueCropper
   },
   data: function() {
     return {
       previews: {},
+      baseImgUrl: '',
       option: {
         img: '',//裁切图片的地址
         outputSize: 1,//裁剪生成图片的质量 0.1-1
@@ -54,24 +59,24 @@ export default {
         original: false,//上传图片按照原始比例渲染
         canMoveBox: false,//截图框能否拖动
         canMove: true,// 上传图片是否可以移动
-        // autoCropWidth: '60%',
-        // autoCropHeight: '94.8%',
-        autoCrop: true,//是否默认生成截图框
+        // autoCrop: true,//是否默认生成截图框
+        // autoCropWidth: '50%',
+        // autoCropHeight: '50%',
         // 开启宽度和高度比例
         fixed: true,
         fixedNumber: [1, 1.24]
       },
     }
   },
+  // computed: {
+  //   "option.img"() {
+  //     return this.imgUrl
+  //   }
+  // },
   created() {
-    let { query: { imgUrl } } = this.$route
-    // console.log('ffff', imgUrl)
-    this.option.img = imgUrl
-    //  'https://img2.baidu.com/it/u=4161857427,3511975444&fm=26&fmt=auto'
   },
   mounted() {
-    // 用户上传的图片旋转正常
-    this.$refs.cropper.rotateRight();
+
   },
   methods: {
     backHome() {
@@ -93,25 +98,35 @@ export default {
     //   this.previews = data
     // },
   },
+  watch: {
+    imgUrl() {
+      console.log('imgUrl---change')
+      if (this.imgUrl) {
+        this.option.img = this.imgUrl
+        // 用户上传的图片旋转正常
+        this.$nextTick(() => {
+          this.$refs.cropper.rotateRight();
+        })
+      }
+    }
+  },
 
 }
 </script>
 
 
 <style scoped>
-body,
-html {
-  height: 100%;
-}
 .box {
   position: relative;
   height: 100%;
 }
 .wrapper {
-  position: fixed;
+  /* position: fixed;
   width: 100%;
   top: 0;
-  height: calc(100% - 50px);
+  height: calc(100% - 50px); */
+  width: 100%;
+  height: 100%;
 }
 .vue-cropper {
   background: black;

@@ -2,13 +2,19 @@
   <div class="home">
     <div class="form">
       <div class="imgBox">
-        <img
+        <div class="innerBoxCut">
+          <img-cut
+            :imgUrl="img"
+            v-show="img"
+          />
+        </div>
+        <!-- <img
           :src="img"
           alt=""
           class="img"
           v-if="img && !img1"
           ref="content"
-        />
+        /> -->
         <!-- <h3>生成图</h3> -->
         <!-- <img  class="demoImg" :src="imgSrc" alt=""> -->
         <!-- <div class="btn" @click="handleClick">click me</div> -->
@@ -67,8 +73,10 @@
 <script>
 import axios from "axios";
 import html2canvas from "html2canvas";
+import imgCut from '@/view/imgCut'
 export default {
   name: "Home",
+  components: { imgCut },
   data() {
     return {
       imgBase64: "",
@@ -109,13 +117,13 @@ export default {
       let reader = new FileReader();
       reader.readAsDataURL(this.file);
       reader.onloadend = () => {
-        this.$router.push({
-          path: '/imgcut',
-          query: {
-            imgUrl: reader.result
-          }
-        })
-        // this.img = reader.result;
+        // this.$router.push({
+        //   path: '/imgcut',
+        //   query: {
+        //     imgUrl: reader.result
+        //   }
+        // })
+        this.img = reader.result;
         // this.$nextTick(()=>{
         // this.handleClick();
         // })
@@ -363,11 +371,18 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 15px;
+  box-sizing: border-box;
 }
 .img {
   display: block;
   width: 90%;
   height: 90%;
+}
+.innerBoxCut {
+  width: 100%;
+  height: 100%;
+  border: 1px solid red;
 }
 </style>
 
