@@ -204,7 +204,7 @@ export default {
         // headers: { "Content-Type": "multipart/form-data" },
         data: {
           name: this.name,
-          file64: this.imgBase64
+          file64: this.img
         }
       }).then((res) => {
         console.log(res);
