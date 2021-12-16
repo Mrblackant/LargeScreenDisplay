@@ -124,16 +124,6 @@ export default {
       }
       console.log(this.targetBoxSize)
     },
-    handleClick() {
-      const self = this;
-      console.log(this.$refs.content);
-      html2canvas(this.$refs.content, {
-        useCORS: true,
-      }).then(function(canvas) {
-        self.imgBase64 = canvas.toDataURL();
-        console.log(self.imgBase64);
-      });
-    },
     inputNameBtn() {
       this.flag = false;
     },
@@ -437,9 +427,6 @@ export default {
 }
 .btn_wapper {
   position: relative;
-  /* display: flex;
-  justify-content: center;
-  align-items: center; */
 }
 </style>
 
