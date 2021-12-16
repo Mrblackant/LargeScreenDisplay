@@ -117,19 +117,16 @@ export default {
     },
     getDomWid() {
       let { imgBoxRef: { offsetWidth, offsetHeight } } = this.$refs
-      console.log('offsetWidth', offsetWidth, 'offsetHeight', offsetHeight)
       this.targetBoxSize = {
         wid: offsetWidth * 0.9,
         hei: offsetHeight * 0.9,
       }
-      console.log(this.targetBoxSize)
     },
     inputNameBtn() {
       this.flag = false;
     },
     updateFace(e) {
       this.file = e.target.files[0] || e.dataTransfer.files[0];
-      console.log(this.file);
       let reader = new FileReader();
       reader.readAsDataURL(this.file);
       reader.onloadend = () => {
@@ -159,7 +156,6 @@ export default {
       this.fileName = time.getTime();
       data.append("file", this.file);
       data.append("fileName", this.fileName);
-      console.log(data);
       this.$axios({
         url: "/img/users",
         method: "post",
@@ -168,19 +164,15 @@ export default {
         data: data,
 
       }).then((res) => {
-        console.log(res.data);
         let blob = new Blob([res.data], { type: "image/jpg" });
         this.file = new File([blob], this.fileName, {
           type: "image/jpg",
           lastModified: Date.now(),
         });
-        // console.log(data)
-        console.log(this.file);
         let fr = new FileReader();
         fr.readAsDataURL(blob);
         fr.onload = (e) => {
           this.img1 = e.target.result;
-          console.log(e.target.result);
         };
       });
     },
@@ -226,7 +218,6 @@ export default {
       var _this = this;
       var video = document.getElementById("video");
       let navigator = window.navigator
-      console.log(navigator)
       //访问用户媒体设备的兼容方法
       function getUserMedia(constrains, success, error) {
         if (navigator.mediaDevices.getUserMedia) {
@@ -265,25 +256,30 @@ export default {
 
       //异常的回调函数
       function error(error) {
-        console.log("访问用户媒体设备失败：", error.name, error.message);
+        this.$message.error('访问用户媒体设备失败：', error.name, error.message)
       }
-      if (
-        navigator.mediaDevices.getUserMedia ||
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia
-      ) {
-        //调用用户媒体设备，访问摄像头
-        let { wid, hei } = _this.targetBoxSize
-        getUserMedia(
-          {
-            video: { width: wid, height: hei },
-          },
-          success,
-          error
-        );
-      } else {
-        alert("你的浏览器不支持访问用户媒体设备");
+      try {
+        if (
+          navigator.mediaDevices.getUserMedia ||
+          navigator.getUserMedia ||
+          navigator.webkitGetUserMedia ||
+          navigator.mozGetUserMedia
+        ) {
+          //调用用户媒体设备，访问摄像头
+          let { wid, hei } = _this.targetBoxSize
+          getUserMedia(
+            {
+              video: { width: wid, height: hei },
+            },
+            success,
+            error
+          );
+        } else {
+          this.$message.error('你的浏览器不支持访问用户媒体设备')
+        }
+      } catch (err) {
+        this.$message.error(err)
+
       }
     },
 
