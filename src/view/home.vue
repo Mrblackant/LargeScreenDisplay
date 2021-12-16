@@ -2,12 +2,21 @@
   <div class="home">
     <div class="form">
       <div class="imgBox">
-        <img :src="img" alt="" class="img" v-if="img && !img1" ref="content" />
+        <img
+          :src="img"
+          alt=""
+          class="img"
+          v-if="img && !img1"
+          ref="content"
+        />
         <!-- <h3>生成图</h3> -->
         <!-- <img  class="demoImg" :src="imgSrc" alt=""> -->
         <!-- <div class="btn" @click="handleClick">click me</div> -->
       </div>
-      <label for="file" class="inputlabelBox">
+      <label
+        for="file"
+        class="inputlabelBox"
+      >
         <div class="inputBox"></div>
       </label>
       <input
@@ -23,7 +32,10 @@
       <img :src="img1" alt="" class="img" v-if="img1" /> -->
       <div class="form-item">
         <div class="name">
-          <label for="name" class="label">姓名</label>
+          <label
+            for="name"
+            class="label"
+          >姓名</label>
           <input
             class="nameinput"
             type="text"
@@ -35,10 +47,20 @@
           />
         </div>
       </div>
-      <div type="submit" class="btn" @click="submit"></div>
+      <div
+        type="submit"
+        class="btn"
+        @click="submit"
+      ></div>
     </div>
-    <div @click="returnToPageOne" class="return">
-      <img src="../assets/return.png" alt="" />
+    <div
+      @click="returnToPageOne"
+      class="return"
+    >
+      <img
+        src="../assets/return.png"
+        alt=""
+      />
     </div>
   </div>
 </template>
@@ -60,18 +82,22 @@ export default {
   mounted() {
     // this.getCompetence();
   },
-  created() {},
+  created() {
+    let { query: { imgUrl } } = this.$route
+    // console.log('ffff', imgUrl)
+    this.img = imgUrl
+  },
   methods: {
     handleClick() {
       const self = this;
       console.log(this.$refs.content);
       html2canvas(this.$refs.content, {
         useCORS: true,
-      }).then(function (canvas) {
+      }).then(function(canvas) {
         self.imgBase64 = canvas.toDataURL();
         console.log(self.imgBase64);
       });
-      
+
 
     },
     inputNameBtn() {
@@ -83,10 +109,16 @@ export default {
       let reader = new FileReader();
       reader.readAsDataURL(this.file);
       reader.onloadend = () => {
-        this.img = reader.result;
-        this.$nextTick(()=>{
-        this.handleClick();
+        this.$router.push({
+          path: '/imgcut',
+          query: {
+            imgUrl: reader.result
+          }
         })
+        // this.img = reader.result;
+        // this.$nextTick(()=>{
+        // this.handleClick();
+        // })
 
       };
     },
@@ -110,7 +142,7 @@ export default {
         // headers: { "Content-Type": "multipart/form-data" },
         responseType: "blob",
         data: data,
-        
+
       }).then((res) => {
         console.log(res.data);
         let blob = new Blob([res.data], { type: "image/jpg" });
@@ -146,10 +178,10 @@ export default {
         url: "/api/leadInfo/uploadBase64",
         method: "post",
         // headers: { "Content-Type": "multipart/form-data" },
-        data:{
-          name:this.name,
-          file64:this.imgBase64
-        }      
+        data: {
+          name: this.name,
+          file64: this.imgBase64
+        }
       }).then((res) => {
         console.log(res);
         if (res.data.code == 200) {
@@ -163,7 +195,7 @@ export default {
           console.log(this.name);
           this.$router.push({ path: "/two", query: { name: this.name } });
         }
-      }).catch(err => {})
+      }).catch(err => { })
     },
     // 调用权限（打开摄像头功能）
     getCompetence() {
@@ -179,7 +211,7 @@ export default {
       // 使用getUserMedia，因为它会覆盖现有的属性。
       // 这里，如果缺少getUserMedia属性，就添加它。
       if (navigator.mediaDevices.getUserMedia === undefined) {
-        navigator.mediaDevices.getUserMedia = function (constraints) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
           // 首先获取现存的getUserMedia(如果存在)
           var getUserMedia =
             navigator.webkitGetUserMedia ||
@@ -193,7 +225,7 @@ export default {
             );
           }
           // 否则，使用Promise将调用包装到旧的navigator.getUserMedia
-          return new Promise(function (resolve, reject) {
+          return new Promise(function(resolve, reject) {
             getUserMedia.call(navigator, constraints, resolve, reject);
           });
         };
@@ -208,7 +240,7 @@ export default {
       };
       navigator.mediaDevices
         .getUserMedia(constraints)
-        .then(function (stream) {
+        .then(function(stream) {
           // 旧的浏览器可能没有srcObject
           if ("srcObject" in _this.thisVideo) {
             _this.thisVideo.srcObject = stream;
@@ -216,7 +248,7 @@ export default {
             // 避免在新的浏览器中使用它，因为它正在被弃用。
             _this.thisVideo.src = window.URL.createObjectURL(stream);
           }
-          _this.thisVideo.onloadedmetadata = function (e) {
+          _this.thisVideo.onloadedmetadata = function(e) {
             _this.thisVideo.play();
           };
         })
@@ -299,25 +331,6 @@ export default {
 .changeImg:active {
   background-image: url(../assets/changeImg_action.png);
 }
-.imgBox {
-  width:40vw ;
-  height:63vw;
-  margin: 0 auto;
-  /* background-color: aqua; */
-  background-image: url(../assets/head.png);
-  background-size: 100% 100%;
-  /* transform: rotate(90deg); */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-}
-.img {
-  display: block;
-  width:57vw;
-  height: 34vw;
-  transform: rotate(90deg);
-}
 .box {
   width: 100%;
   height: 60vh;
@@ -340,6 +353,21 @@ export default {
   position: absolute;
   top: 85%;
   left: 78%;
+}
+.imgBox {
+  width: 40vw;
+  height: 49.6vw;
+  margin: 0 auto;
+  background-image: url(../assets/head.png);
+  background-size: 100% 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.img {
+  display: block;
+  width: 90%;
+  height: 90%;
 }
 </style>
 

@@ -10,6 +10,7 @@ import two from '@/view/two'
 import three from '@/view/three'
 import four from '@/view/four'
 import Home from '@/view/home'
+import Imgcut from '@/view/imgCut'
 import MskDemoSwitch from '@/view/switch'
 import banner from '@/components/banner'
 
@@ -58,5 +59,10 @@ export default new Router({
             name: 'MskDemoSwitch',
             component: MskDemoSwitch
         },
+          {
+      path: '/imgcut',
+      name: 'Imgcut',
+      component: Imgcut
+  },
     ]
 })
