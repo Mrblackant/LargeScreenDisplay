@@ -7,13 +7,20 @@
           ref="imgBoxRef"
         >
           <!--video用于显示媒体设备的视频流，自动播放-->
-          <video
+          <div
             v-show="!this.img"
-            id="video"
-            ref="videoRef"
-            :style="{ width: targetBoxSize.wid, height:targetBoxSize.hei}"
-            autoplay
-          />
+            ref="divRef"
+            class="video_wapper_box"
+            :style="{ width: targetBoxSize.wid+'px', height:targetBoxSize.hei+'px'}"
+          >
+            <video
+              id="video"
+              ref="videoRef"
+              height="100%"
+              style="object-fit: fill"
+              autoplay
+            />
+          </div>
           <!--描绘video截图-->
           <img
             v-show="this.img"
@@ -100,6 +107,7 @@ export default {
     },
     takePic() {//视频截取拍照
       let { videoRef, contextRef } = this.$refs
+      let { videoRef: { offsetWidth: W, offsetHeight: H } } = this.$refs
       let { targetBoxSize: { wid, hei } } = this
       // 
       var canvas = document.createElement("canvas");
@@ -110,7 +118,7 @@ export default {
       // let context = contextRef.getContext("2d");
       // console.log(wid, hei)
       // 画布转base64
-      ctx.drawImage(videoRef, 0, 0, wid, hei);
+      ctx.drawImage(videoRef, 0, 0, W, H);
       var dataURL = canvas.toDataURL("image/jpeg");
       this.img = dataURL || ''
 
@@ -380,6 +388,9 @@ export default {
   top: 85%;
   left: 78%;
 }
+.returnClass img {
+  width: 20vw;
+}
 .imgBox {
   width: 40vw;
   height: 49.6vw;
@@ -423,6 +434,9 @@ export default {
 }
 .btn_wapper {
   position: relative;
+}
+.video_wapper_box {
+  overflow: hidden;
 }
 </style>
 
